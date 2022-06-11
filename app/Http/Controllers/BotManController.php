@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use BotMan\BotMan\BotMan;
-use Illuminate\Http\Request;
-use App\Conversations\OnBoardConversation;
+use App\BotMan\Middleware\RegisterChatMiddleware;
 
 class BotManController extends Controller
 {
@@ -16,6 +14,7 @@ class BotManController extends Controller
         require base_path('routes/botman.php');
         $botman = app('botman');
 
+        $botman->middleware->received(new RegisterChatMiddleware());
         $botman->listen();
     }
 }
