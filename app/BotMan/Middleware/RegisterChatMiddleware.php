@@ -7,7 +7,6 @@ use App\Service\Chat\ChatService;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\Interfaces\Middleware\Received;
 use BotMan\BotMan\Messages\Incoming\IncomingMessage;
-use Illuminate\Support\Facades\Log;
 
 class RegisterChatMiddleware implements Received
 {
