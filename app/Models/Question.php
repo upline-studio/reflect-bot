@@ -10,7 +10,7 @@ class Question extends Model
 {
     protected $casts = [
         'question_type' => QuestionType::class,
-        'variants' => 'json'
+        'variants' => 'array'
     ];
 
     public function getRandomVariant()
