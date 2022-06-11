@@ -5,12 +5,12 @@ namespace App\Service\Chat;
 class ChatData
 {
     private string $chatId;
-    private string $userName;
+    private ?string $userName;
     private ?string $firstName;
     private ?string $lastName;
     private ?string $bio;
 
-    public function __construct(string $chatId, string $userName, ?string $firstName, ?string $lastName, ?string $bio)
+    public function __construct(string $chatId, ?string $userName, ?string $firstName, ?string $lastName, ?string $bio)
     {
         $this->chatId = $chatId;
         $this->userName = $userName;
@@ -28,9 +28,9 @@ class ChatData
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getUserName(): string
+    public function getUserName(): ?string
     {
         return $this->userName;
     }
