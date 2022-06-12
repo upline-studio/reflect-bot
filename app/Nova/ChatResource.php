@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use App\Models\Chat;
+use App\Nova\Actions\TriggerChatEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Nova\Actions\Action;
@@ -90,6 +91,7 @@ class ChatResource extends Resource
     public function actions(Request $request): array
     {
         return [
+            TriggerChatEvent::make()->onlyInline()
         ];
     }
 }
