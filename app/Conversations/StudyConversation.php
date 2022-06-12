@@ -42,9 +42,7 @@ class StudyConversation extends Conversation
                     $this->getBot()->startConversation(new TroubleShuttingConversation());
                 } else {
                     $this->executeAppraisalInDepthQuestion($value);
-                    if ($wasPreviousBad) {
-                        $this->getBot()->startConversation(new IsPreviousProblemSolvedConversation());
-                    }
+
                 }
 
             }
@@ -70,7 +68,18 @@ class StudyConversation extends Conversation
         $this->ask($question, function (Answer $answer) use ($questionWrapper) {
             $questionWrapper->handleBotManAnswer($answer);
             $this->say('Спасибо за ответ!');
+
+
+            $currentChallenge = app(ChatService::class)
+                ->getChatFromAnswer($answer)
+                ->currentChallenge;
+
+            if ($currentChallenge) {
+                $this->getBot()
+                    ->startConversation(new ChallengeReflectionConversation($currentChallenge));
+            }
         });
+
     }
 
     private function getAppraisalInDepthQuestion(QuestionType $questionType): Question

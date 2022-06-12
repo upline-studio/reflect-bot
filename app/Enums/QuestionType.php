@@ -20,6 +20,12 @@ use BenSampo\Enum\Enum;
  * @method static static WHY_DO_YOU_LEARN()
  * @method static static TELL_ABOUT_DIFFICULTIES()
  * @method static static SEND_TO_MENTOR()
+ *
+ * @method static static CHALLENGE_DO_YOU_USE_TECHNIC()
+ * @method static static CHALLENGE_TRY_TOMORROW()
+ * @method static static CHALLENGE_DO_YOU_LIKE_IT()
+ * @method static static CHALLENGE_TELL_WHAT_YOU_LIKE()
+ * @method static static CHALLENGE_WILL_YOU_USE()
  */
 final class QuestionType extends Enum
 {
@@ -45,4 +51,13 @@ final class QuestionType extends Enum
     const WHY_DO_YOU_LEARN = 'why-do-you-learn';
     const TELL_ABOUT_DIFFICULTIES = 'tell-about-difficulties';
     const SEND_TO_MENTOR = 'send-to-mentor';
+
+    const CHALLENGE_DO_YOU_USE_TECHNIC = 'challenge-do-you-use-technic';
+    const CHALLENGE_TRY_TOMORROW = 'challenge-try-tomorrow';
+    const CHALLENGE_DO_YOU_LIKE_IT = 'challenge-do-you-like-it';
+    const CHALLENGE_TELL_WHAT_YOU_LIKE = 'challenge-tell-what-you-like';
+    const CHALLENGE_WILL_YOU_USE = 'challenge-will-you-use';
 }
+
+
+

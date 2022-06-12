@@ -5,7 +5,6 @@ namespace App\Conversations;
 use App\BotMan\QuestionWrapperFactory;
 use App\Enums\QuestionType;
 use App\Enums\YesNoEnum;
-use BotMan\BotMan\BotMan;
 use BotMan\BotMan\Messages\Conversations\Conversation;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;

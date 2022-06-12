@@ -6,11 +6,14 @@ use App\BotMan\QuestionWrapperFactory;
 use App\Enums\QuestionType;
 use App\Models\Challenge;
 use App\Models\Chat;
+use App\Service\ChallengeService;
+use App\Service\Chat\ChatService;
 use App\Service\QuestionService;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Conversations\Conversation;
+use Illuminate\Support\Facades\Log;
 
 class ChallengeConversation extends Conversation
 {
@@ -19,10 +22,23 @@ class ChallengeConversation extends Conversation
      */
 
     protected string $positiveAnswer = 'Да';
+    protected ChallengeService $challengeService;
+    protected ChatService $chatService;
+
+    public function __construct()
+    {
+        $this->challengeService = new ChallengeService();
+        $this->chatService = new ChatService();
+    }
 
     public function run()
     {
-        $this->executeWantChallengeQuestion();
+        $currentChallenge = $this->chatService->getChatFromBotMan($this->getBot())->currentChallenge;
+        if ($currentChallenge) {
+            $this->getBot()->startConversation(new ChallengeReflectionConversation($currentChallenge));
+        } else {
+            $this->executeWantChallengeQuestion();
+        }
     }
 
     private function executeWantChallengeQuestion()
@@ -79,7 +95,8 @@ class ChallengeConversation extends Conversation
 
     private function getAvailableChallenge(Chat $chat): ?Challenge
     {
-        $completedChallenges = $chat->challenges->pluck('challenge_id')->all();
+        $completedChallenges = $chat->challenges->pluck('id')->all();
+        Log::info($completedChallenges);
         return Challenge::whereNotIn('id', $completedChallenges)->orderBy('sort_order')->first();
     }
 
