@@ -3,6 +3,8 @@
 namespace App\Service\Chat;
 
 use App\Models\Chat;
+use BotMan\BotMan\BotMan;
+use BotMan\BotMan\Messages\Incoming\Answer;
 
 class ChatService
 {
@@ -22,5 +24,20 @@ class ChatService
         $chat->save();
 
         return $chat;
+    }
+
+    public function getChat(int $chatId): Chat
+    {
+        return Chat::where('chat_id', $chatId)->first();
+    }
+
+    public function getChatFromAnswer(Answer $answer): Chat
+    {
+        return $answer->getMessage()->getExtras('chat')->first();
+    }
+
+    public function getChatFromBotMan(BotMan $botMan): Chat
+    {
+        return $this->getChat($botMan->getUser()->getId());
     }
 }

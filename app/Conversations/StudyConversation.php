@@ -4,6 +4,8 @@ namespace App\Conversations;
 
 use App\BotMan\QuestionWrapperFactory;
 use App\Enums\QuestionType;
+use App\Models\Chat;
+use App\Service\Chat\ChatService;
 use App\Service\QuestionService;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Question;
@@ -20,27 +22,38 @@ class StudyConversation extends Conversation
         $this->executeAppraisalQuestion();
     }
 
-    private function executeAppraisalQuestion() {
-        $question = $this->getAppraisalQuestion();
-        $questionWrapper = app(QuestionWrapperFactory::class)->getQuestionWrapper(QuestionType::HOW_YOUR_STUDY());
+    private function executeAppraisalQuestion()
+    {
+        $questionWrapper = app(QuestionWrapperFactory::class)
+            ->getQuestionWrapper(QuestionType::HOW_YOUR_STUDY());
 
-        $this->ask($question, function (Answer $answer) use ($questionWrapper) {
+        $previousAnswer = $questionWrapper->getLatestAnswer($this->getBot());
+
+        $question = $this->getAppraisalQuestion($questionWrapper->getQuestionText());
+
+        $wasPreviousBad = $previousAnswer->answer === QuestionType::BAD_EXPERIENCE;
+
+        $this->ask($question, function (Answer $answer) use ($questionWrapper, $wasPreviousBad) {
             if ($answer->isInteractiveMessageReply()) {
                 $questionWrapper->handleBotManAnswer($answer);
                 $value = QuestionType::fromValue($answer->getValue());
-                $this->executeAppraisalInDepthQuestion($value);
+
+                if ($wasPreviousBad && $value->is(QuestionType::BAD_EXPERIENCE)) {
+                    $this->getBot()->startConversation(new TroubleShuttingConversation());
+                } else {
+                    $this->executeAppraisalInDepthQuestion($value);
+                    if ($wasPreviousBad) {
+                        $this->getBot()->startConversation(new IsPreviousProblemSolvedConversation());
+                    }
+                }
+
             }
         });
     }
 
-    private function getAppraisalQuestion(): Question
+    private function getAppraisalQuestion(string $text): Question
     {
-        $questionService = app(QuestionService::class);
-        return Question::create(
-            $questionService
-                ->getRandomQuestion(QuestionType::HOW_YOUR_STUDY())
-                ->getRandomVariant()
-        )
+        return Question::create($text)
             ->fallback('Unable to ask question')
             ->callbackId('ask_study_reflection')
             ->addButtons([
@@ -50,7 +63,8 @@ class StudyConversation extends Conversation
             ]);
     }
 
-    private function executeAppraisalInDepthQuestion(QuestionType $questionType) {
+    private function executeAppraisalInDepthQuestion(QuestionType $questionType)
+    {
         $question = $this->getAppraisalInDepthQuestion($questionType);
         $questionWrapper = app(QuestionWrapperFactory::class)->getQuestionWrapper($questionType);
         $this->ask($question, function (Answer $answer) use ($questionWrapper) {
