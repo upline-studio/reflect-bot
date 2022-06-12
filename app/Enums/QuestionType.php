@@ -13,4 +13,7 @@ final class QuestionType extends Enum
 
     const WHAT_IS_SUBJECT = 'subject';
     const WHAT_IS_GOAL = 'goal';
+
+    const CHALLENGE = 'challenge';
+    const ACCEPT_CHALLENGE = 'accept-challenge';
 }

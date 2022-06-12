@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Challenge;
+use App\Models\Chat;
 use Illuminate\Support\Facades\Route;
 
 /*
