@@ -3,14 +3,20 @@
 namespace App\Conversations;
 
 use App\BotMan\QuestionWrapperFactory;
+use App\Commands\ChatCommand;
 use App\Enums\QuestionType;
 use BotMan\BotMan\Messages\Conversations\Conversation;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Question;
-use Illuminate\Support\Facades\Log;
 
 class NewSubjectConversation extends Conversation
 {
+    protected ?ChatCommand $next;
+
+    public function __construct(ChatCommand $next = null)
+    {
+        $this->next = $next;
+    }
 
     /**
      * First question
@@ -48,6 +54,9 @@ class NewSubjectConversation extends Conversation
         return $this->ask($question, function (Answer $answer) use ($questionWrapper) {
             $questionWrapper->handleBotManAnswer($answer);
             $this->say('Спасибо за твои ответы!');
+            if ($this->next) {
+                ($this->next)($this->getBot());
+            }
         });
     }
 }
