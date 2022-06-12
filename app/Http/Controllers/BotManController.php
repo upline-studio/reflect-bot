@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\BotMan\Middleware\RegisterChatMiddleware;
+use BotMan\BotMan\BotMan;
 
 class BotManController extends Controller
 {
@@ -12,6 +13,7 @@ class BotManController extends Controller
     public function handle()
     {
         require base_path('routes/botman.php');
+        /** @var BotMan $botman */
         $botman = app('botman');
 
         $botman->middleware->received(new RegisterChatMiddleware());
