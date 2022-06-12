@@ -24,4 +24,14 @@ class QuestionService
         $answer->save();
         return $answer;
     }
+
+    public function getLatestAnswer(Chat $chat, QuestionType $questionType): ?Answer
+    {
+        return Answer::where('chat_id', $chat->id)
+            ->whereHas('question', function ($query) use ($questionType) {
+                return $query->where('question_type', $questionType->value);
+            })
+            ->orderByDesc('created_at')
+            ->first();
+    }
 }

@@ -2,8 +2,11 @@
 
 namespace App\BotMan;
 
+use App\Models\Answer as AnswerModel;
 use App\Models\Question;
+use App\Service\Chat\ChatService;
 use App\Service\QuestionService;
+use BotMan\BotMan\BotMan;
 use BotMan\BotMan\Messages\Incoming\Answer;
 
 class QuestionWrapper
@@ -22,10 +25,19 @@ class QuestionWrapper
         return $this->chosenVariant;
     }
 
-    public function handleBotManAnswer(Answer $answer, string $savingValue = null): \App\Models\Answer
+    public function getLatestAnswer(BotMan $botMan): ?AnswerModel
+    {
+        $chat = app(ChatService::class)->getChatFromBotMan($botMan);
+        return app(QuestionService::class)->getLatestAnswer(
+            $chat,
+            $this->question->question_type
+        );
+    }
+
+    public function handleBotManAnswer(Answer $answer, string $savingValue = null): AnswerModel
     {
         return app(QuestionService::class)->registerAnswer(
-            $answer->getMessage()->getExtras('chat')->first(),
+            app(ChatService::class)->getChatFromAnswer($answer),
             $this->question,
             $this->chosenVariant,
             $savingValue ?? $answer->getText()
