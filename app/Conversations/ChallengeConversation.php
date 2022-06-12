@@ -25,7 +25,8 @@ class ChallengeConversation extends Conversation
         $this->executeWantChallengeQuestion();
     }
 
-    private function executeWantChallengeQuestion() {
+    private function executeWantChallengeQuestion()
+    {
         $question = $this->getWantChallengeQuestion();
         $questionWrapper = app(QuestionWrapperFactory::class)->getQuestionWrapper(QuestionType::CHALLENGE());
 
@@ -54,7 +55,8 @@ class ChallengeConversation extends Conversation
         });
     }
 
-    private function executeAcceptChallengeQuestion(Challenge $challenge) {
+    private function executeAcceptChallengeQuestion(Challenge $challenge)
+    {
         $question = $this->getAcceptChallengeQuestion();
         $questionWrapper = app(QuestionWrapperFactory::class)->getQuestionWrapper(QuestionType::CHALLENGE());
 
@@ -75,7 +77,8 @@ class ChallengeConversation extends Conversation
         });
     }
 
-    private function getAvailableChallenge(Chat $chat): ?Challenge {
+    private function getAvailableChallenge(Chat $chat): ?Challenge
+    {
         $completedChallenges = $chat->challenges->pluck('challenge_id')->all();
         return Challenge::whereNotIn('id', $completedChallenges)->orderBy('sort_order')->first();
     }
@@ -96,7 +99,8 @@ class ChallengeConversation extends Conversation
             ]);
     }
 
-    private function getAcceptChallengeQuestion(): Question {
+    private function getAcceptChallengeQuestion(): Question
+    {
         $questionService = app(QuestionService::class);
         return Question::create(
             $questionService
