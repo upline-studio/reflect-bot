@@ -10,4 +10,7 @@ final class QuestionType extends Enum
     const BAD_EXPERIENCE = 'bad-experience';
     const OK_EXPERIENCE = 'ok-experience';
     const GOOD_EXPERIENCE = 'good-experience';
+
+    const WHAT_IS_SUBJECT = 'subject';
+    const WHAT_IS_GOAL = 'goal';
 }
