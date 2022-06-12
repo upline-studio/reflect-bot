@@ -2,11 +2,9 @@
 
 namespace App\Conversations;
 
+use App\BotMan\QuestionWrapperFactory;
 use App\Enums\QuestionType;
-use App\Enums\StudyConversationActions;
-use App\Enums\StudyExperienceType;
 use App\Service\QuestionService;
-use Illuminate\Foundation\Inspiring;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
@@ -14,125 +12,63 @@ use BotMan\BotMan\Messages\Conversations\Conversation;
 
 class StudyConversation extends Conversation
 {
-    private QuestionService $questionService;
-
-    private array $appraisalAnswers = [
-        [
-            StudyExperienceType::GOOD => [
-                [
-                    'text' => 'Напишите, что нового вы сегодня узнали?',
-                    'action' => StudyConversationActions::TEXT
-                ],
-                [
-                    'text' => 'Напишите, как вы можете применить изученные данные?',
-                    'action' => StudyConversationActions::TEXT
-                ],
-                [
-                    'text' => 'Столкнулись ли с чем-то, что стоит копнуть поглубже?',
-                    'action' => StudyConversationActions::BOOLEAN
-                ],
-                [
-                    'text' => 'Есть ли какие-то идеи, новые понимания?',
-                    'action' => StudyConversationActions::BOOLEAN
-                ],
-            ],
-            StudyExperienceType::OK => [
-                [
-                    'text' => 'Напишите, что нового вы сегодня узнали?',
-                    'action' => StudyConversationActions::TEXT
-                ],
-                [
-                    'text' => 'Напишите, как вы можете применить изученные данные?',
-                    'action' => StudyConversationActions::TEXT
-                ],
-                [
-                    'text' => 'Столкнулись ли с чем-то, что стоит копнуть поглубже?',
-                    'action' => StudyConversationActions::BOOLEAN
-                ],
-                [
-                    'text' => 'Есть ли какие-то идеи, новые понимания?',
-                    'action' => StudyConversationActions::BOOLEAN
-                ],
-            ],
-            StudyExperienceType::BAD => [
-                [
-                    'text' => 'Напишите, что нового вы сегодня узнали?',
-                    'action' => StudyConversationActions::TEXT
-                ],
-                [
-                    'text' => 'Напишите, как вы можете применить изученные данные?',
-                    'action' => StudyConversationActions::TEXT
-                ],
-                [
-                    'text' => 'Столкнулись ли с чем-то, что стоит копнуть поглубже?',
-                    'action' => StudyConversationActions::BOOLEAN
-                ],
-                [
-                    'text' => 'Есть ли какие-то идеи, новые понимания?',
-                    'action' => StudyConversationActions::BOOLEAN
-                ],
-            ],
-        ]
-
-    ];
-
     /**
      * First question
      */
     public function run()
     {
-        $this->questionService = app(QuestionService::class);
-        $question = $this->getAppraisalQuestion();
+        $this->executeAppraisalQuestion();
+    }
 
-        return $this->ask($question, function (Answer $answer) {
+    private function executeAppraisalQuestion() {
+        $question = $this->getAppraisalQuestion();
+        $questionWrapper = app(QuestionWrapperFactory::class)->getQuestionWrapper(QuestionType::HOW_YOUR_STUDY());
+
+        $this->ask($question, function (Answer $answer) use ($questionWrapper) {
             if ($answer->isInteractiveMessageReply()) {
-                $value = StudyExperienceType::fromValue($answer->getValue());
-                $this->getAppraisalAnswer($value);
-//                switch ($value) {
-//                    case 'bad':
-//                        $this->
-//                        $this->say('А шо такое?');
-//                        break;
-//                    case 'ok':
-//                        $this->say('Кул');
-//                        break;
-//                    case 'good':
-//                        $this->say('Молодец, как 🥒🧂');
-//                        break;
-//                }
+                $questionWrapper->handleBotManAnswer($answer);
+                $value = QuestionType::fromValue($answer->getValue());
+                $this->executeAppraisalInDepthQuestion($value);
             }
-            // TODO ask theme questions
         });
     }
 
     private function getAppraisalQuestion(): Question
     {
+        $questionService = app(QuestionService::class);
         return Question::create(
-            $this->questionService
+            $questionService
                 ->getRandomQuestion(QuestionType::HOW_YOUR_STUDY())
                 ->getRandomVariant()
         )
             ->fallback('Unable to ask question')
             ->callbackId('ask_study_reflection')
             ->addButtons([
-                Button::create('😒 что-то не очень')->value(StudyExperienceType::BAD),
-                Button::create('😕 пойдет')->value(StudyExperienceType::OK),
-                Button::create('😃 супер')->value(StudyExperienceType::GOOD),
+                Button::create('😒 что-то не очень')->value(QuestionType::BAD_EXPERIENCE),
+                Button::create('😕 пойдет')->value(QuestionType::OK_EXPERIENCE),
+                Button::create('😃 супер')->value(QuestionType::GOOD_EXPERIENCE),
             ]);
     }
 
-    private function getAppraisalAnswer(StudyExperienceType $experienceType)
+    private function executeAppraisalInDepthQuestion(QuestionType $questionType) {
+        $question = $this->getAppraisalInDepthQuestion($questionType);
+        $questionWrapper = app(QuestionWrapperFactory::class)->getQuestionWrapper($questionType);
+        $this->ask($question, function (Answer $answer) use ($questionWrapper) {
+            $questionWrapper->handleBotManAnswer($answer);
+            $this->say('Спасибо за ответ!');
+        });
+    }
+
+    private function getAppraisalInDepthQuestion(QuestionType $questionType): Question
     {
-        switch ($experienceType) {
-            case StudyExperienceType::BAD():
-                $this->say('А шо такое?');
-                break;
-            case StudyExperienceType::OK():
-                $this->say('Кул');
-                break;
-            case StudyExperienceType::GOOD():
-                $this->say('Молодец, как 🥒🧂');
-                break;
-        }
+        $questionService = app(QuestionService::class);
+
+        return Question::create(
+            $questionService
+                ->getRandomQuestion($questionType)
+                ->getRandomVariant()
+        )
+            ->fallback('Unable to ask question')
+            ->callbackId('ask_study_reflection');
     }
 }
