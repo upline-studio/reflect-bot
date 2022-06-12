@@ -3,6 +3,7 @@
 namespace App\Conversations;
 
 use App\BotMan\QuestionWrapperFactory;
+use App\Commands\StartNewChallengeCommand;
 use App\Enums\QuestionType;
 use App\Models\Challenge;
 use App\Models\Chat;
@@ -46,6 +47,7 @@ class ChallengeConversation extends Conversation
         $question = $this->getWantChallengeQuestion();
         $questionWrapper = app(QuestionWrapperFactory::class)->getQuestionWrapper(QuestionType::CHALLENGE());
 
+
         $this->ask($question, function (Answer $answer) use ($questionWrapper) {
             if ($answer->isInteractiveMessageReply()) {
                 $answerData = $questionWrapper->handleBotManAnswer($answer);
@@ -56,48 +58,9 @@ class ChallengeConversation extends Conversation
                     return;
                 }
 
-                $challenge = $this->getAvailableChallenge($answerData->chat);
-
-                if (empty($challenge)) {
-                    $this->say('Ты прошел все челленджи!');
-                    return;
-                }
-
-                $this->say('Челлендж: ' . $challenge->name);
-                $this->say($challenge->description);
-
-                $this->executeAcceptChallengeQuestion($challenge);
+                StartNewChallengeCommand::make()->run($this->getBot());
             }
         });
-    }
-
-    private function executeAcceptChallengeQuestion(Challenge $challenge)
-    {
-        $question = $this->getAcceptChallengeQuestion();
-        $questionWrapper = app(QuestionWrapperFactory::class)->getQuestionWrapper(QuestionType::CHALLENGE());
-
-        $this->ask($question, function (Answer $answer) use ($questionWrapper, $challenge) {
-            $answerData = $questionWrapper->handleBotManAnswer($answer);
-            $value = $answer->getValue();
-            $questionWrapper->handleBotManAnswer($answer);
-
-            if ($value !== $this->positiveAnswer) {
-                $this->say('Хорошо. Тогда, в следующий раз!');
-                return;
-            }
-
-            $answerData->chat->challenge_id = $challenge->id;
-            $answerData->chat->save();
-
-            $this->say('Отлично! Пробуй учиться этим методом!');
-        });
-    }
-
-    private function getAvailableChallenge(Chat $chat): ?Challenge
-    {
-        $completedChallenges = $chat->challenges->pluck('id')->all();
-        Log::info($completedChallenges);
-        return Challenge::whereNotIn('id', $completedChallenges)->orderBy('sort_order')->first();
     }
 
     private function getWantChallengeQuestion(): Question
@@ -110,22 +73,6 @@ class ChallengeConversation extends Conversation
         )
             ->fallback('Unable to ask question')
             ->callbackId('ask_want_challenge')
-            ->addButtons([
-                Button::create('👍 Да')->value($this->positiveAnswer),
-                Button::create('❌ Нет')->value('Нет'),
-            ]);
-    }
-
-    private function getAcceptChallengeQuestion(): Question
-    {
-        $questionService = app(QuestionService::class);
-        return Question::create(
-            $questionService
-                ->getRandomQuestion(QuestionType::ACCEPT_CHALLENGE())
-                ->getRandomVariant()
-        )
-            ->fallback('Unable to ask question')
-            ->callbackId('ask_accept_challenge')
             ->addButtons([
                 Button::create('👍 Да')->value($this->positiveAnswer),
                 Button::create('❌ Нет')->value('Нет'),

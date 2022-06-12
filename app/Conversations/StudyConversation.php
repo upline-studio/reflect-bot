@@ -41,10 +41,8 @@ class StudyConversation extends Conversation
                 if ($wasPreviousBad && $value->is(QuestionType::BAD_EXPERIENCE)) {
                     $this->getBot()->startConversation(new TroubleShuttingConversation());
                 } else {
-                    $this->executeAppraisalInDepthQuestion($value);
-
+                    $this->executeAppraisalInDepthQuestion($value, $wasPreviousBad);
                 }
-
             }
         });
     }
@@ -61,11 +59,11 @@ class StudyConversation extends Conversation
             ]);
     }
 
-    private function executeAppraisalInDepthQuestion(QuestionType $questionType)
+    private function executeAppraisalInDepthQuestion(QuestionType $questionType, bool $wasPreviousBad = false)
     {
         $question = $this->getAppraisalInDepthQuestion($questionType);
         $questionWrapper = app(QuestionWrapperFactory::class)->getQuestionWrapper($questionType);
-        $this->ask($question, function (Answer $answer) use ($questionWrapper) {
+        $this->ask($question, function (Answer $answer) use ($questionWrapper, $wasPreviousBad) {
             $questionWrapper->handleBotManAnswer($answer);
             $this->say('Спасибо за ответ!');
 
@@ -75,8 +73,14 @@ class StudyConversation extends Conversation
                 ->currentChallenge;
 
             if ($currentChallenge) {
-                $this->getBot()
-                    ->startConversation(new ChallengeReflectionConversation($currentChallenge));
+                $this
+                    ->getBot()
+                    ->startConversation(
+                        new ChallengeReflectionConversation(
+                            $currentChallenge,
+                            $wasPreviousBad ? new IsPreviousProblemSolvedConversation() : null
+                        )
+                    );
             }
         });
 

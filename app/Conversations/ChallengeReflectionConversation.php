@@ -4,6 +4,7 @@ namespace App\Conversations;
 
 use App\BotMan\EnumQuestion;
 use App\BotMan\QuestionWrapperFactory;
+use App\Commands\StartNewChallengeCommand;
 use App\Enums\ChallengeAttitude;
 use App\Enums\QuestionType;
 use App\Enums\YesNoEnum;
@@ -102,6 +103,8 @@ class ChallengeReflectionConversation extends Conversation
                             $this->chatService->getChatFromAnswer($answer),
                             $this->challenge
                         );
+
+                        StartNewChallengeCommand::make()->run($this->getBot());
                     } else {
                         $this->say('Хорошо');
                         if ($this->nextConversation) {
@@ -154,6 +157,7 @@ class ChallengeReflectionConversation extends Conversation
                         )
                     );
                     $this->say('Спасибо за ваши ответы!');
+                    StartNewChallengeCommand::make()->run($this->getBot());
                     if ($this->nextConversation) {
                         $this->getBot()->startConversation($this->nextConversation);
                     }
