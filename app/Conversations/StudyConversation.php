@@ -31,7 +31,7 @@ class StudyConversation extends Conversation
 
         $question = $this->getAppraisalQuestion($questionWrapper->getQuestionText());
 
-        $wasPreviousBad = $previousAnswer->answer === QuestionType::BAD_EXPERIENCE;
+        $wasPreviousBad = $previousAnswer?->answer === QuestionType::BAD_EXPERIENCE;
 
         $this->ask($question, function (Answer $answer) use ($questionWrapper, $wasPreviousBad) {
             if ($answer->isInteractiveMessageReply()) {
