@@ -69,7 +69,9 @@ class TroubleShuttingConversation extends Conversation
                                     $chat,
                                     QuestionType::WHAT_IS_GOAL()
                                 );
-                            $this->say($goal->answer);
+                            if ($goal) {
+                                $this->say($goal->answer);
+                            }
                             $this->askWhatYouHaveLearnt();
                             break;
                         case WhatsGoingOnAnswers::I_KNOW_EVERYTHING:

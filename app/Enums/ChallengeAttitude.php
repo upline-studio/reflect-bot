@@ -12,4 +12,18 @@ final class ChallengeAttitude extends Enum implements LocalizedEnum
     const OK = 'ok';
     const BAD = 'bad';
     const DONT_DECIDE = 'dont-decide';
+
+    public function getEmoji(): ?string
+    {
+        switch ($this->value) {
+            case self::GOOD:
+                return '😃';
+            case self::OK:
+                return '😐';
+            case self::BAD:
+                return '🙁';
+        }
+
+        return null;
+    }
 }

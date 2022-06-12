@@ -22,7 +22,8 @@ class StartNewChallengeCommand extends ChatCommand
         $challenge = $this->getAvailableChallenge($chat);
 
         if (empty($challenge)) {
-            $botMan->reply('Ты прошел все челленджи!');
+            $botMan->reply('Ты прошел все челленджи! Вот как ты оценил механики:');
+            AllChallengesCompletedCommand::make()->run($botMan);
             return;
         }
 
