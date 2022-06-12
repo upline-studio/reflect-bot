@@ -2,6 +2,7 @@
 
 use App\Commands\HelpCommand;
 use App\Commands\StartCommand;
+use App\Conversations\ChallengeConversation;
 use App\Conversations\NewSubjectConversation;
 use App\Conversations\StudyConversation;
 use BotMan\BotMan\BotMan;
@@ -18,4 +19,8 @@ $botman->hears('/new-subject', function (BotMan $bot) {
 
 $botman->hears('/reflection', function (BotMan $bot) {
     $bot->startConversation(new StudyConversation());
+});
+
+$botman->hears('/challenge', function (BotMan $bot) {
+   $bot->startConversation(new ChallengeConversation());
 });
