@@ -5,6 +5,7 @@ namespace App\Service\Chat;
 use App\Models\Chat;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\Messages\Incoming\Answer;
+use Illuminate\Support\Facades\Log;
 
 class ChatService
 {
@@ -33,7 +34,7 @@ class ChatService
 
     public function getChatFromAnswer(Answer $answer): Chat
     {
-        return $answer->getMessage()->getExtras('chat')->first();
+        return $answer->getMessage()->getExtras('chat');
     }
 
     public function getChatFromBotMan(BotMan $botMan): Chat

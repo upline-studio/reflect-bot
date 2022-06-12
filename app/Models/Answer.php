@@ -10,7 +10,9 @@ class Answer extends Model
     {
         return $this->belongsTo(Question::class);
     }
-    public function chat() {
+
+    public function chat()
+    {
         return $this->belongsTo(Chat::class);
     }
 }

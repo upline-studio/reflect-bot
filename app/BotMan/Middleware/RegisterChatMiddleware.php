@@ -7,6 +7,7 @@ use App\Service\Chat\ChatService;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\Interfaces\Middleware\Received;
 use BotMan\BotMan\Messages\Incoming\IncomingMessage;
+use Illuminate\Support\Facades\Log;
 
 class RegisterChatMiddleware implements Received
 {
@@ -32,6 +33,8 @@ class RegisterChatMiddleware implements Received
                 null,
             )
         );
+
+        Log::info($chat->id);
 
         $message->addExtras('chat', $chat);
         return $next($message);
